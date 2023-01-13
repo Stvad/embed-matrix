@@ -2,6 +2,8 @@ import ReactDOM from 'react-dom/client'
 import React from 'react'
 import {GuestRoomView} from 'matrix-rx'
 import {ChakraProvider} from '@chakra-ui/react'
+import {CacheProvider} from '@emotion/react'
+import createCache from '@emotion/cache'
 
 interface InitProps {
     roomId: string
@@ -10,11 +12,21 @@ interface InitProps {
 }
 
 export const init = (params: InitProps) => {
-    ReactDOM.createRoot(params.rootElement).render(
+    console.log('Initializing matrix-rx', params)
+    const shadowRoot = params.rootElement.attachShadow({mode: 'open'})
+
+    const styleCache = createCache({
+        key: 'embed-matrix',
+        container: shadowRoot as Node,
+    })
+
+    ReactDOM.createRoot(shadowRoot).render(
         <React.StrictMode>
-            <ChakraProvider>
-                <GuestRoomView roomId={params.roomId} server={params.server}/>
-            </ChakraProvider>
+            <CacheProvider value={styleCache}>
+                <ChakraProvider>
+                    <GuestRoomView roomId={params.roomId} server={params.server}/>
+                </ChakraProvider>
+            </CacheProvider>
         </React.StrictMode>,
     )
 }
